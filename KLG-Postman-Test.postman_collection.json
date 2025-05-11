@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "a76ecf1a-6b65-481f-996e-59b6a903bbcb",
+		"name": "KLG-Postman-Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST /user - Create User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"// Generate random 5-digit number",
+							"function randomDigits(length) {",
+							"    return Math.floor(Math.pow(10, length - 1) + Math.random() * 9 * Math.pow(10, length - 1));",
+							"}",
+							"",
+							"// Set random values",
+							"let randomId = randomDigits(5);",
+							"let randomNum = randomDigits(5);",
+							"let phoneNum = randomDigits(10);",
+							"",
+							"let firstNames = [\"Akil\", \"Islamyah\", \"Dwi\", \"Aizen\", \"Noah\", \"Ava\", \"Sophia\", \"Mason\", \"Ratna\"];",
+							"let lastNames = [\"Indira\", \"Sabina\", \"Arkan\", \"Eki\", \"Miller\", \"Wilson\", \"Rayaan\", \"Reyhan\"];",
+							"",
+							"let firstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
+							"let lastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
+							"",
+							"let username = `test_akil_${randomNum}`;",
+							"let email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNum}@example.com`;",
+							"let password = `P@ssw0rd${randomNum}`;",
+							"",
+							"// Set environment variables",
+							"pm.environment.set(\"id\", randomId);",
+							"pm.environment.set(\"username\", username);",
+							"pm.environment.set(\"firstName\", firstName);",
+							"pm.environment.set(\"lastName\", lastName);",
+							"pm.environment.set(\"email\", email);",
+							"pm.environment.set(\"password\", password);",
+							"pm.environment.set(\"phone\", phoneNum);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Status Code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Response is JSON",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"//  Response contains 'message' field",
+							"pm.test(\"Response contains user ID as message\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json).to.have.property(\"message\");",
+							"    pm.expect(Number(json.message)).to.be.a(\"number\");",
+							"});",
+							"",
+							"// Check code is 200 and type is 'unknown'",
+							"pm.test(\"Response has correct code and type\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.code).to.eql(200);",
+							"    pm.expect(json.type).to.eql(\"unknown\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{id}}\",\n    \"username\": \"{{username}}\",\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"{{phone}}\",\n    \"userStatus\": 1\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v2/user",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v2",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /user/{username} - Get User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Status Code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Response is JSON",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"// Username matches",
+							"pm.test(\"Username matches requested\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.username).to.eql(pm.variables.get(\"username\"));",
+							"});",
+							"",
+							"// Check required fields are present",
+							"pm.test(\"User object has all expected fields\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json).to.have.all.keys(\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\");",
+							"});",
+							"",
+							"// Check email format (basic)",
+							"pm.test(\"Email is in valid format\", function () {",
+							"    const email = pm.response.json().email;",
+							"    pm.expect(email).to.match(/^[\\w.-]+@[\\w.-]+\\.\\w+$/);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/v2/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v2",
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /user/{username} - Update User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"// Generate random 5-digit number",
+							"function randomDigits(length) {",
+							"    return Math.floor(Math.pow(10, length - 1) + Math.random() * 9 * Math.pow(10, length - 1));",
+							"}",
+							"",
+							"// Set random values",
+							"let randomId = randomDigits(5);",
+							"let randomNum = randomDigits(5);",
+							"let phoneNum = randomDigits(10);",
+							"",
+							"let firstNames = [\"Akil\", \"Islamyah\", \"Dwi\", \"Aizen\", \"Noah\", \"Ava\", \"Sophia\", \"Mason\", \"Ratna\"];",
+							"let lastNames = [\"Indira\", \"Sabina\", \"Arkan\", \"Eki\", \"Miller\", \"Wilson\", \"Rayaan\", \"Reyhan\"];",
+							"",
+							"let firstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
+							"let lastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
+							"",
+							"let username = `test_akil_${randomNum}`;",
+							"let email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${randomNum}@example.com`;",
+							"let password = `P@ssw0rd${randomNum}`;",
+							"",
+							"// Set environment variables",
+							"pm.environment.set(\"id\", randomId);",
+							"pm.environment.set(\"username\", username);",
+							"pm.environment.set(\"firstName\", firstName);",
+							"pm.environment.set(\"lastName\", lastName);",
+							"pm.environment.set(\"email\", email);",
+							"pm.environment.set(\"password\", password);",
+							"pm.environment.set(\"phone\", phoneNum);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Status code check",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Response is JSON",
+							"pm.test(\"Response is valid JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"// Check response structure and content",
+							"pm.test(\"Response has expected structure\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json).to.have.property(\"code\", 200);",
+							"    pm.expect(json).to.have.property(\"type\", \"unknown\");",
+							"    pm.expect(json).to.have.property(\"message\");",
+							"    pm.expect(Number(json.message)).to.be.a(\"number\");",
+							"});",
+							"",
+							"// Store message ID if needed later",
+							"pm.environment.set(\"lastUpdatedId\", pm.response.json().message);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{id}}\",\n    \"username\": \"{{username}}\",\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"{{phone}}\",\n    \"userStatus\": 1\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v2/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v2",
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /user/invalid_user - Negative Case",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Status code should be 404",
+							"pm.test(\"Status code is 404 (User not found)\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"// Response is JSON",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"// Message confirms user not found",
+							"pm.test(\"Response message says 'User not found'\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.message).to.eql(\"User not found\");",
+							"    pm.expect(json.type).to.eql(\"error\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/v2/user/invalid_user",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v2",
+						"user",
+						"invalid_user"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
